@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Browser
 import Html exposing (Html, button, div, h1, input, p, section, span, text)
-import Html.Attributes exposing (class, id, name, placeholder, type_, value)
+import Html.Attributes exposing (class, classList, id, name, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 
 
@@ -23,13 +23,17 @@ type alias Task =
     { id : Int, description : String }
 
 
+type alias Error =
+    { state : Bool, message : String }
+
+
 type alias Model =
-    { tasks : List Task, newTaskDescription : String }
+    { tasks : List Task, newTaskDescription : String, errorState : Error }
 
 
 init : Model
 init =
-    { tasks = [], newTaskDescription = "" }
+    { tasks = [], newTaskDescription = "", errorState = { state = False, message = "" } }
 
 
 
@@ -47,7 +51,7 @@ update msg model =
         CreateTask ->
             case model.newTaskDescription of
                 "" ->
-                    ( model, Cmd.none )
+                    ( { model | errorState = { state = True, message = "Test" } }, Cmd.none )
 
                 _ ->
                     let
@@ -58,7 +62,7 @@ update msg model =
                         newTask =
                             Task taskId model.newTaskDescription
                     in
-                    ( { model | tasks = newTask :: model.tasks, newTaskDescription = "" }, Cmd.none )
+                    ( { model | tasks = newTask :: model.tasks, newTaskDescription = "", errorState = { state = False, message = "" } }, Cmd.none )
 
         UpdateNewTaskDescription newTask ->
             ( { model | newTaskDescription = newTask }, Cmd.none )
@@ -79,6 +83,7 @@ view model =
                         [ placeholder "Your next task is..."
                         , type_ "text"
                         , id "new-task-input"
+                        , classList [ ( "input-error", model.errorState.state ) ]
                         , name "new-task-input"
                         , value model.newTaskDescription
                         , onInput UpdateNewTaskDescription

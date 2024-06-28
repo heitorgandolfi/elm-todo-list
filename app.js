@@ -5159,7 +5159,11 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$init = {newTaskDescription: '', tasks: _List_Nil};
+var $author$project$Main$init = {
+	errorState: {message: '', state: false},
+	newTaskDescription: '',
+	tasks: _List_Nil
+};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$core$Platform$Sub$batch = _Platform_batch;
@@ -5173,7 +5177,13 @@ var $author$project$Main$update = F2(
 		if (msg.$ === 'CreateTask') {
 			var _v1 = model.newTaskDescription;
 			if (_v1 === '') {
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							errorState: {message: 'Test', state: true}
+						}),
+					$elm$core$Platform$Cmd$none);
 			} else {
 				var taskId = $elm$core$List$length(model.tasks) + 1;
 				var newTask = A2($author$project$Main$Task, taskId, model.newTaskDescription);
@@ -5181,6 +5191,7 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
+							errorState: {message: '', state: false},
 							newTaskDescription: '',
 							tasks: A2($elm$core$List$cons, newTask, model.tasks)
 						}),
@@ -5209,6 +5220,31 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$html$Html$Attributes$classList = function (classes) {
+	return $elm$html$Html$Attributes$class(
+		A2(
+			$elm$core$String$join,
+			' ',
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$first,
+				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
+};
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
@@ -5369,6 +5405,11 @@ var $author$project$Main$view = function (model) {
 												$elm$html$Html$Attributes$placeholder('Your next task is...'),
 												$elm$html$Html$Attributes$type_('text'),
 												$elm$html$Html$Attributes$id('new-task-input'),
+												$elm$html$Html$Attributes$classList(
+												_List_fromArray(
+													[
+														_Utils_Tuple2('input-error', model.errorState.state)
+													])),
 												$elm$html$Html$Attributes$name('new-task-input'),
 												$elm$html$Html$Attributes$value(model.newTaskDescription),
 												$elm$html$Html$Events$onInput($author$project$Main$UpdateNewTaskDescription)
