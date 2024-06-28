@@ -1,8 +1,8 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, h1, input, p, section, span, text)
-import Html.Attributes exposing (class, classList, id, name, placeholder, type_, value)
+import Html exposing (Html, button, div, h1, img, input, p, section, span, text)
+import Html.Attributes exposing (class, classList, id, name, placeholder, src, type_, value)
 import Html.Events exposing (onClick, onInput)
 
 
@@ -31,9 +31,21 @@ type alias Model =
     { tasks : List Task, newTaskDescription : String, errorState : Error }
 
 
+deleteIconPath : String
+deleteIconPath =
+    "../assets/icons/delete-icon.png"
+
+
 init : Model
 init =
-    { tasks = [], newTaskDescription = "", errorState = { state = False, message = "" } }
+    { tasks =
+        [ Task 1 "Task 1"
+        , Task 2 "Task 2"
+        , Task 3 "Task 3"
+        ]
+    , newTaskDescription = ""
+    , errorState = { state = False, message = "" }
+    }
 
 
 
@@ -43,6 +55,7 @@ init =
 type Msg
     = CreateTask
     | UpdateNewTaskDescription String
+    | DeleteTask Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -62,10 +75,19 @@ update msg model =
                         newTask =
                             Task taskId model.newTaskDescription
                     in
-                    ( { model | tasks = newTask :: model.tasks, newTaskDescription = "", errorState = { state = False, message = "" } }, Cmd.none )
+                    ( { model
+                        | tasks = newTask :: model.tasks
+                        , newTaskDescription = ""
+                        , errorState = Error False ""
+                      }
+                    , Cmd.none
+                    )
 
         UpdateNewTaskDescription newTask ->
             ( { model | newTaskDescription = newTask }, Cmd.none )
+
+        DeleteTask taskId ->
+            ( { model | tasks = List.filter (\task -> task.id /= taskId) model.tasks }, Cmd.none )
 
 
 
@@ -112,6 +134,9 @@ renderTasks tasks =
 taskCardView : Task -> Html Msg
 taskCardView task =
     div [ class "task-card" ]
-        [ span [] [ text "ícone" ]
-        , p [] [ text task.description ]
+        [ div []
+            [ span [] [ text "ícone" ]
+            , p [] [ text task.description ]
+            ]
+        , img [ onClick <| DeleteTask task.id, src deleteIconPath ] [ text "Excluir" ]
         ]
