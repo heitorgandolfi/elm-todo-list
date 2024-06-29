@@ -8,6 +8,8 @@ import Html exposing (Html, button, div, h1, i, input, p, section, text)
 import Html.Attributes exposing (alt, class, classList, id, name, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as Encode
+import Random
+import UUID exposing (UUID, generator, toString)
 
 
 
@@ -21,11 +23,10 @@ main =
 
 
 -- MODEL
--- Change the id type to String to use the UUID library
 
 
 type alias Task =
-    { id : Int, description : String, isDone : Bool }
+    { id : String, description : String, isDone : Bool }
 
 
 type alias Error =
@@ -60,7 +61,7 @@ port storeTasks : Encode.Value -> Cmd msg
 encodeTask : Task -> Encode.Value
 encodeTask task =
     Encode.object
-        [ ( "id", Encode.int task.id )
+        [ ( "id", Encode.string task.id )
         , ( "description", Encode.string task.description )
         , ( "isDone", Encode.bool task.isDone )
         ]
@@ -75,8 +76,8 @@ saveTasksOnLocalStorage tasks =
 type Msg
     = CreateTask
     | UpdateNewTaskDescription String
-    | DeleteTask Int
-    | UpdateTask Int
+    | DeleteTask String
+    | UpdateTask String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -92,7 +93,9 @@ update msg model =
             else
                 let
                     taskId =
-                        List.length model.tasks + 1
+                        Random.step generator (Random.initialSeed 12345)
+                            |> Tuple.first
+                            |> toString
 
                     newTask =
                         Task taskId model.newTaskDescription False
@@ -122,12 +125,12 @@ update msg model =
             ( { model | tasks = updatedTasks }, saveTasksOnLocalStorage updatedTasks )
 
 
-filterTaskToDelete : Int -> List Task -> List Task
+filterTaskToDelete : String -> List Task -> List Task
 filterTaskToDelete taskId =
     List.filter (\task -> task.id /= taskId)
 
 
-updateTask : Int -> List Task -> List Task
+updateTask : String -> List Task -> List Task
 updateTask taskId =
     List.map
         (\task ->
