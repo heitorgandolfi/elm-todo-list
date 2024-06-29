@@ -14,9 +14,9 @@ import Json.Encode as Encode
 -- MAIN
 
 
-main : Program () Model Msg
+main : Program (List Task) Model Msg
 main =
-    Browser.element { init = \_ -> ( init, Cmd.none ), update = update, view = view, subscriptions = \_ -> Sub.none }
+    Browser.element { init = \flags -> ( init flags, Cmd.none ), update = update, view = view, subscriptions = \_ -> Sub.none }
 
 
 
@@ -41,10 +41,10 @@ deleteIconPath =
     "../assets/icons/delete-icon.png"
 
 
-init : Model
-init =
+init : List Task -> Model
+init flags =
     { tasks =
-        []
+        flags
     , newTaskDescription = ""
     , errorState = Error False ""
     }
@@ -83,39 +83,43 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         CreateTask ->
-            case model.newTaskDescription of
-                "" ->
-                    ( { model | errorState = Error True "It is not possible to insert a new blank task." }, Cmd.none )
+            if String.isEmpty model.newTaskDescription then
+                ( { model | errorState = Error True "Não é possível inserir uma nova tarefa em branco." }, Cmd.none )
 
-                _ ->
-                    let
-                        -- This is a temporary solution to generate unique IDs. I will change it later when i implemented the delete function.
-                        taskId =
-                            List.length model.tasks + 1
+            else if String.length model.newTaskDescription > 200 then
+                ( { model | errorState = Error True "A descrição da tarefa deve ter, no máximo, 200 caracteres." }, Cmd.none )
 
-                        newTask =
-                            Task taskId model.newTaskDescription False
-                    in
-                    ( { model
-                        | tasks = newTask :: model.tasks
-                        , newTaskDescription = ""
-                        , errorState = Error False ""
-                      }
-                    , saveTasksOnLocalStorage (newTask :: model.tasks)
-                    )
+            else
+                let
+                    taskId =
+                        List.length model.tasks + 1
+
+                    newTask =
+                        Task taskId model.newTaskDescription False
+
+                    updatedTasks =
+                        newTask :: model.tasks
+                in
+                ( { model | tasks = updatedTasks, newTaskDescription = "", errorState = Error False "" }
+                , saveTasksOnLocalStorage updatedTasks
+                )
 
         UpdateNewTaskDescription newTask ->
             ( { model | newTaskDescription = newTask }, Cmd.none )
 
         DeleteTask taskId ->
-            ( { model | tasks = filterTaskToDelete taskId model.tasks }, Cmd.none )
+            let
+                updatedTasks =
+                    filterTaskToDelete taskId model.tasks
+            in
+            ( { model | tasks = updatedTasks }, saveTasksOnLocalStorage updatedTasks )
 
         UpdateTask taskId ->
             let
-                completedTask =
+                updatedTasks =
                     updateTask taskId model.tasks
             in
-            ( { model | tasks = completedTask }, Cmd.none )
+            ( { model | tasks = updatedTasks }, saveTasksOnLocalStorage updatedTasks )
 
 
 filterTaskToDelete : Int -> List Task -> List Task
