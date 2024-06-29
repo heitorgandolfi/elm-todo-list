@@ -1,11 +1,13 @@
+@import url("./theme/variables.css");
+
 * {
   font-family: "Poppins", sans-serif;
   font-weight: 500;
 }
 
 body {
-  background-color: #222222;
-  color: #fff;
+  background-color: var(--bg-color);
+  color: var(--white);
 }
 
 textarea:focus,
@@ -27,14 +29,11 @@ input:focus {
   max-width: 1200px;
   width: 100%;
   padding: 1rem;
-
-  /* background-color: rgb(155, 153, 153); */
 }
 
 .content section {
   display: flex;
   flex-direction: column;
-  align-items: center;
 
   max-width: 500px;
   width: 100%;
@@ -45,6 +44,7 @@ input:focus {
 }
 
 .content section h1 {
+  text-align: center;
   font-size: 2rem;
   margin-bottom: 2rem;
 }
@@ -59,20 +59,23 @@ input:focus {
 }
 
 .input-group input[type="text"].input-error {
-  border: 2px solid #8f2929;
+  border: 2px solid var(--error-color);
 }
 
 .input-group input[type="text"] {
   width: 70%;
   padding: 1rem;
+
+  transition: ease-in-out 0.5s;
+
   border: 2px solid transparent;
   border-radius: 5px;
 
-  background-color: #363636;
-  color: #fff;
+  background-color: var(--light-gray);
+  color: var(--white);
 
   &:hover {
-    border: 2px solid #4e6ede;
+    border: 2px solid var(--hover-blue);
   }
 }
 
@@ -85,15 +88,23 @@ input:focus {
   font-size: 1rem;
   font-weight: bold;
 
+  transition: ease-in-out 0.5s;
+
   border: 1px solid transparent;
   border-radius: 5px;
 
   color: white;
-  background-color: #3c61e6;
+  background-color: var(--accent-color);
 
   &:hover {
-    opacity: 0.9;
+    background-color: var(--accent-hover-color);
   }
+}
+
+.error-message {
+  margin-top: 0.75rem;
+  color: var(--error-color);
+  font-weight: 400;
 }
 
 .task-card {
@@ -105,35 +116,59 @@ input:focus {
   padding: 1rem;
   margin-bottom: 1rem;
 
-  background-color: #303030;
+  background-color: var(--dark-gray);
   border: 1px solid transparent;
   border-radius: 8px;
 
-  box-shadow: 10px 10px 13px -10px #000000bf;
+  box-shadow: 10px 10px 13px -10px var(--shadow-color);
 }
 
 .task-card div {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 18px;
+  gap: 1.125rem;
 }
 
-.task-card p {
-  font-weight: 300;
+i {
+  width: 20px;
+  height: 20px;
 }
 
-.task-card img {
+.task-card div i {
   cursor: pointer;
-  width: 34px;
+
+  transition: ease-in-out 0.4s;
+
+  border: 1px solid transparent;
+  border-radius: 99px;
+
+  color: var(--ligther-gray);
 
   &:hover {
-    opacity: 0.8;
+    color: var(--hover-gray);
   }
 }
 
+.task-card div i.task-done {
+  color: var(--success-color);
+
+  &:hover {
+    color: var(--hover-gray);
+  }
+}
+
+.task-card div p {
+  font-weight: 300;
+}
+
+.task-done {
+  text-decoration: line-through;
+  color: var(--disabled-gray);
+}
+
 #divide {
-  background-color: #2d2d2d;
+  background-color: var(--divider-color);
   height: 2px;
   width: 100%;
 
@@ -146,5 +181,17 @@ input:focus {
 
 .empty-state p {
   font-weight: 400;
-  color: #7b7979;
+  color: var(--disabled-gray);
+}
+
+.remove-task-icon {
+  cursor: pointer;
+
+  transition: ease-in-out 0.5s;
+
+  color: var(--remove-icon-color);
+
+  &:hover {
+    color: var(--remove-icon-hover-color);
+  }
 }

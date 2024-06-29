@@ -1,0 +1,19 @@
+:root {
+  --bg-color: #222222;
+  --white: #fff;
+  --accent-color: #3c61e6;
+  --accent-hover-color: #2a4fd3;
+  --error-color: #8f2929;
+  --success-color: #36bd73;
+  --divider-color: #2d2d2d;
+
+  --dark-gray: #303030;
+  --ligther-gray: #4d4c4c;
+  --light-gray: #363636;
+  --hover-blue: #4e6ede;
+  --hover-gray: #646464;
+  --disabled-gray: #7b7979;
+  --shadow-color: #000000bf;
+  --remove-icon-color: #ac3838;
+  --remove-icon-hover-color: #d14545;
+}
