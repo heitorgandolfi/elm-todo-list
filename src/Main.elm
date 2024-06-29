@@ -1,12 +1,13 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser
-import FontAwesome as Icon exposing (Icon)
+import FontAwesome as Icon
 import FontAwesome.Attributes as Icon
 import FontAwesome.Solid as Icon
-import Html exposing (Html, button, div, h1, i, img, input, p, section, span, text)
-import Html.Attributes exposing (alt, class, classList, id, name, placeholder, src, type_, value)
+import Html exposing (Html, button, div, h1, i, input, p, section, text)
+import Html.Attributes exposing (alt, class, classList, id, name, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
+import Json.Encode as Encode
 
 
 
@@ -43,10 +44,7 @@ deleteIconPath =
 init : Model
 init =
     { tasks =
-        [ Task 1 "Task 1" True
-        , Task 2 "Task 2" False
-        , Task 3 "Task 3" True
-        ]
+        []
     , newTaskDescription = ""
     , errorState = Error False ""
     }
@@ -54,6 +52,24 @@ init =
 
 
 -- UPDATE
+
+
+port storeTasks : Encode.Value -> Cmd msg
+
+
+encodeTask : Task -> Encode.Value
+encodeTask task =
+    Encode.object
+        [ ( "id", Encode.int task.id )
+        , ( "description", Encode.string task.description )
+        , ( "isDone", Encode.bool task.isDone )
+        ]
+
+
+saveTasksOnLocalStorage : List Task -> Cmd msg
+saveTasksOnLocalStorage tasks =
+    Encode.list encodeTask tasks
+        |> storeTasks
 
 
 type Msg
@@ -85,7 +101,7 @@ update msg model =
                         , newTaskDescription = ""
                         , errorState = Error False ""
                       }
-                    , Cmd.none
+                    , saveTasksOnLocalStorage (newTask :: model.tasks)
                     )
 
         UpdateNewTaskDescription newTask ->
