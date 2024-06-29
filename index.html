@@ -17,10 +17,16 @@
     <div id="app"></div>
     <script src="app.js"></script>
     <script>
-      const app = Elm.Main.init({ node: document.getElementById("app") });
+      const storageKey = "tasks";
+      const flags = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+      const app = Elm.Main.init({
+        node: document.getElementById("app"),
+        flags: flags,
+      });
 
       app.ports.storeTasks.subscribe((tasks) => {
-        localStorage.setItem("tasks", JSON.stringify(tasks));
+        localStorage.setItem(storageKey, JSON.stringify(tasks));
       });
     </script>
   </body>
