@@ -159,6 +159,8 @@ i {
 }
 
 .task-card div p {
+  max-width: 380px;
+  width: auto;
   font-weight: 300;
 }
 
