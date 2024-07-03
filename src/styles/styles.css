@@ -154,7 +154,7 @@ i {
   color: var(--success-color);
 
   &:hover {
-    color: var(--hover-gray);
+    opacity: 0.8;
   }
 }
 
