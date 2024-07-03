@@ -9,7 +9,7 @@ import Html.Attributes exposing (alt, class, classList, id, name, placeholder, t
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as Encode
 import Random
-import UUID exposing (UUID, generator, toString)
+import UUID exposing (generator, toString)
 
 
 
@@ -18,7 +18,7 @@ import UUID exposing (UUID, generator, toString)
 
 main : Program (List Task) Model Msg
 main =
-    Browser.element { init = \flags -> ( init flags, Cmd.none ), update = update, view = view, subscriptions = \_ -> Sub.none }
+    Browser.element { init = init, update = update, view = view, subscriptions = \_ -> Sub.none }
 
 
 
@@ -34,20 +34,20 @@ type alias Error =
 
 
 type alias Model =
-    { tasks : List Task, newTaskDescription : String, errorState : Error }
+    { tasks : List Task, newTaskDescription : String, errorState : Error, randomNumber : Int }
 
 
-deleteIconPath : String
-deleteIconPath =
-    "../assets/icons/delete-icon.png"
-
-
-init : List Task -> Model
+init : List Task -> ( Model, Cmd Msg )
 init flags =
-    { tasks =
-        flags
+    ( { initialModel | tasks = flags }, generateRandomIntCmd )
+
+
+initialModel : Model
+initialModel =
+    { tasks = []
     , newTaskDescription = ""
     , errorState = Error False ""
+    , randomNumber = 0
     }
 
 
@@ -73,11 +73,17 @@ saveTasksOnLocalStorage tasks =
         |> storeTasks
 
 
+generateRandomIntCmd : Cmd Msg
+generateRandomIntCmd =
+    Random.generate RandomNumberGenerated (Random.int 1 100000)
+
+
 type Msg
     = CreateTask
     | UpdateNewTaskDescription String
     | DeleteTask String
     | UpdateTask String
+    | RandomNumberGenerated Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -93,7 +99,7 @@ update msg model =
             else
                 let
                     taskId =
-                        Random.step generator (Random.initialSeed 12345)
+                        Random.step generator (Random.initialSeed model.randomNumber)
                             |> Tuple.first
                             |> toString
 
@@ -104,7 +110,7 @@ update msg model =
                         newTask :: model.tasks
                 in
                 ( { model | tasks = updatedTasks, newTaskDescription = "", errorState = Error False "" }
-                , saveTasksOnLocalStorage updatedTasks
+                , Cmd.batch [ saveTasksOnLocalStorage updatedTasks, generateRandomIntCmd ]
                 )
 
         UpdateNewTaskDescription newTask ->
@@ -124,14 +130,17 @@ update msg model =
             in
             ( { model | tasks = updatedTasks }, saveTasksOnLocalStorage updatedTasks )
 
+        RandomNumberGenerated number ->
+            ( { model | randomNumber = number }, Cmd.none )
+
 
 filterTaskToDelete : String -> List Task -> List Task
-filterTaskToDelete taskId =
-    List.filter (\task -> task.id /= taskId)
+filterTaskToDelete taskId tasks =
+    List.filter (\task -> task.id /= taskId) tasks
 
 
 updateTask : String -> List Task -> List Task
-updateTask taskId =
+updateTask taskId tasks =
     List.map
         (\task ->
             if task.id == taskId then
@@ -140,6 +149,7 @@ updateTask taskId =
             else
                 task
         )
+        tasks
 
 
 
