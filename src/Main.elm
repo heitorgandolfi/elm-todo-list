@@ -4,7 +4,7 @@ import Browser
 import FontAwesome as Icon
 import FontAwesome.Attributes as Icon
 import FontAwesome.Solid as Icon
-import Html exposing (Html, button, div, h1, i, input, p, section, text)
+import Html exposing (Html, button, div, h1, i, input, p, section, span, text)
 import Html.Attributes exposing (alt, class, classList, id, name, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as Encode
@@ -34,7 +34,7 @@ type alias Error =
 
 
 type alias Model =
-    { tasks : List Task, newTaskDescription : String, errorState : Error, randomNumber : Int }
+    { tasks : List Task, newTaskDescription : String, errorState : Error, randomNumber : Int, completedTasksCount : Int }
 
 
 init : List Task -> ( Model, Cmd Msg )
@@ -48,6 +48,7 @@ initialModel =
     , newTaskDescription = ""
     , errorState = Error False ""
     , randomNumber = 0
+    , completedTasksCount = 0
     }
 
 
@@ -91,10 +92,10 @@ update msg model =
     case msg of
         CreateTask ->
             if String.isEmpty model.newTaskDescription then
-                ( { model | errorState = Error True "Não é possível inserir uma nova tarefa em branco." }, Cmd.none )
+                ( { model | errorState = Error True "Cannot add a new task with an empty description." }, Cmd.none )
 
             else if String.length model.newTaskDescription > 200 then
-                ( { model | errorState = Error True "A descrição da tarefa deve ter, no máximo, 200 caracteres." }, Cmd.none )
+                ( { model | errorState = Error True "Task description must be at most 200 characters long." }, Cmd.none )
 
             else
                 let
@@ -127,8 +128,11 @@ update msg model =
             let
                 updatedTasks =
                     updateTask taskId model.tasks
+
+                completedTasks =
+                    updateCompletedTasksCount updatedTasks
             in
-            ( { model | tasks = updatedTasks }, saveTasksOnLocalStorage updatedTasks )
+            ( { model | tasks = updatedTasks, completedTasksCount = completedTasks }, saveTasksOnLocalStorage updatedTasks )
 
         RandomNumberGenerated number ->
             ( { model | randomNumber = number }, Cmd.none )
@@ -152,6 +156,11 @@ updateTask taskId tasks =
         tasks
 
 
+updateCompletedTasksCount : List Task -> Int
+updateCompletedTasksCount tasks =
+    List.length (List.filter .isDone tasks)
+
+
 
 -- VIEW
 
@@ -160,25 +169,34 @@ view : Model -> Html Msg
 view model =
     div [ class "container" ]
         [ div [ class "content" ]
-            [ section []
-                [ h1 [] [ text "ToDo List" ]
-                , div [ class "input-group" ]
-                    [ input
-                        [ placeholder "Your next task is..."
-                        , type_ "text"
-                        , id "new-task-input"
-                        , classList [ ( "input-error", model.errorState.state ) ]
-                        , name "new-task-input"
-                        , value model.newTaskDescription
-                        , onInput UpdateNewTaskDescription
-                        ]
-                        []
-                    , button [ onClick CreateTask ] [ text "+" ]
-                    ]
-                , renderErrorMessage model.errorState.message
-                ]
+            [ renderNewTaskInput <| model
             , div [ id "divide" ] []
             , renderTasks <| model.tasks
+            ]
+        ]
+
+
+renderNewTaskInput : Model -> Html Msg
+renderNewTaskInput model =
+    section []
+        [ h1 [] [ text "ToDo List" ]
+        , div [ class "input-group" ]
+            [ input
+                [ placeholder "Your next task is..."
+                , type_ "text"
+                , id "new-task-input"
+                , classList [ ( "input-error", model.errorState.state ) ]
+                , name "new-task-input"
+                , value model.newTaskDescription
+                , onInput UpdateNewTaskDescription
+                ]
+                []
+            , button [ onClick CreateTask ] [ text "+" ]
+            ]
+        , renderErrorMessage model.errorState.message
+        , div [ class "task-counter" ]
+            [ p [] [ text "Total Tasks: ", span [ class "total-tasks-counter" ] [ text (String.fromInt <| List.length model.tasks) ] ]
+            , p [] [ text "Completed Tasks: ", span [ class "completed-tasks-counter" ] [ text (String.fromInt model.completedTasksCount) ] ]
             ]
         ]
 

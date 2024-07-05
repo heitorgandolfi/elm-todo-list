@@ -109,10 +109,9 @@ input:focus {
 
 .task-card {
   display: flex;
-  align-items: center;
+  /* align-items: center; */
   justify-content: space-between;
 
-  width: 95%;
   padding: 1rem;
   margin-bottom: 1rem;
 
@@ -159,8 +158,9 @@ i {
 }
 
 .task-card div p {
-  max-width: 380px;
+  max-width: 250px;
   width: auto;
+  line-break: anywhere;
   font-weight: 300;
 }
 
@@ -177,6 +177,35 @@ i {
   border-radius: 18px;
 }
 
+.task-counter {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-wrap: wrap;
+
+  margin-top: 1.5rem;
+}
+
+.task-counter p {
+  font-weight: 300;
+}
+
+.total-tasks-counter {
+  display: inline-block;
+  padding: 8px 12px;
+
+  border-radius: 999px;
+  background-color: var(--hover-blue);
+}
+
+.completed-tasks-counter {
+  display: inline-block;
+  padding: 8px 12px;
+
+  border-radius: 999px;
+  background-color: var(--success-color);
+}
+
 .empty-state {
   margin-top: 2.5rem;
 }
@@ -188,6 +217,7 @@ i {
 
 .remove-task-icon {
   cursor: pointer;
+  min-width: 20px;
 
   transition: ease-in-out 0.5s;
 
