@@ -39,7 +39,12 @@ type alias Model =
 
 init : List Task -> ( Model, Cmd Msg )
 init flags =
-    ( { initialModel | tasks = flags }, generateRandomIntCmd )
+    ( { initialModel
+        | tasks = flags
+        , completedTasksCount = updateCompletedTasksCount <| flags
+      }
+    , generateRandomIntCmd
+    )
 
 
 initialModel : Model
